@@ -17,3 +17,18 @@ export const loginUser = async (
 
   return response.data;
 };
+
+export const registerUser = async (
+  fullName: string,
+  email: string,
+  password: string
+) => {
+  await axios.post(`${API_URL}/auth/register`, {
+    full_name: fullName,
+    email,
+    password,
+  });
+
+  // After registration, log the user in automatically
+  return loginUser(email, password);
+};

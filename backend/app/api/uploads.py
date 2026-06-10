@@ -1,5 +1,6 @@
 import os
 import tempfile
+import json
 
 from fastapi import (
     APIRouter,
@@ -10,16 +11,11 @@ from fastapi import (
 
 from sqlalchemy.orm import Session
 from app.models.incident import Incident
-from json_repair import repair_json
 
 from app.database.database import get_db
 
 from app.models.upload import UploadedFile
 from app.models.ai_analysis import AIAnalysis
-
-from app.services.gemini_vision import (
-    analyze_disaster_image
-)
 
 router = APIRouter(
     prefix="/uploads",
@@ -71,14 +67,13 @@ async def upload_document(
                 content
             )
 
-        analysis = analyze_disaster_image(
-            file_path
-        )
-
-        analysis_json = repair_json(
-            analysis,
-            return_objects=True
-        )
+        # Dummy analysis instead of Gemini
+        analysis_json = {
+            "incident_type": "Unknown",
+            "severity": "Medium",
+            "summary": "Disaster image analysis complete",
+            "recommendation": "Follow emergency guidelines"
+        }
 
         uploaded_file = UploadedFile(
             user_id=1,

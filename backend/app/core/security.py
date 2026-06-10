@@ -7,7 +7,7 @@ from datetime import timedelta
 import os
 
 pwd_context = CryptContext(
-    schemes=["bcrypt"],
+    schemes=["pbkdf2_sha256"],
     deprecated="auto"
 )
 

@@ -7,10 +7,15 @@ import {
   Popup,
   CircleMarker,
 } from "react-leaflet";
+import { motion } from "framer-motion";
+import { FaChartBar, FaExclamationTriangle, FaFire } from "react-icons/fa";
 
 import {
   getIncidents,
 } from "../services/incidentService";
+import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar";
+import StatCard from "../components/StatCard";
 
 interface Incident {
   id: number;
@@ -111,209 +116,144 @@ export default function MapPage() {
     ).length;
 
   return (
-    <div className="h-screen flex flex-col bg-slate-950">
+    <div className="min-h-screen bg-[#071226] text-white flex">
+      <Sidebar />
+      <div className="flex-1 flex flex-col">
+        <Navbar title="Disaster Map" />
 
-      {/* Header */}
-
-      <div className="bg-slate-950 text-white px-6 py-4 border-b border-slate-800">
-
-        <h1 className="text-2xl font-bold">
-          Sentinel AI
-          Disaster Monitoring Map
-        </h1>
-
-      </div>
-
-      {/* Statistics */}
-
-      <div className="bg-slate-900 border-b border-slate-800 p-4">
-
-        <div className="grid grid-cols-3 gap-4">
-
-          <div className="bg-slate-800 rounded-lg p-4">
-
-            <p className="text-slate-400">
-              Total Incidents
-            </p>
-
-            <h2 className="text-2xl font-bold text-white">
-              {incidents.length}
-            </h2>
-
+        <div className="flex-1 flex flex-col">
+          {/* Statistics */}
+          <div className="p-4 border-b border-slate-800">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
+              <StatCard
+                title="Total Incidents"
+                value={incidents.length}
+                icon={FaChartBar}
+              />
+              <StatCard
+                title="High Severity"
+                value={highSeverity}
+                icon={FaFire}
+                color="text-red-500"
+              />
+              <StatCard
+                title="Active Emergencies"
+                value={incidents.length}
+                icon={FaExclamationTriangle}
+                color="text-amber-500"
+              />
+            </div>
           </div>
 
-          <div className="bg-slate-800 rounded-lg p-4">
-
-            <p className="text-slate-400">
-              High Severity
-            </p>
-
-            <h2 className="text-2xl font-bold text-red-400">
-              {highSeverity}
-            </h2>
-
-          </div>
-
-          <div className="bg-slate-800 rounded-lg p-4">
-
-            <p className="text-slate-400">
-              Active Emergencies
-            </p>
-
-            <h2 className="text-2xl font-bold text-orange-400">
-              {incidents.length}
-            </h2>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* Filter Buttons */}
-
-      <div className="bg-slate-950 p-4 flex gap-3 flex-wrap">
-
-        {[
-          "All",
-          "Fire",
-          "Flood",
-          "Medical",
-          "Earthquake",
-        ].map((item) => (
-          <button
-            key={item}
-            onClick={() =>
-              setFilter(item)
-            }
-            className={`px-4 py-2 rounded-lg transition ${
-              filter === item
-                ? "bg-red-600 text-white"
-                : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-            }`}
-          >
-            {item}
-          </button>
-        ))}
-
-      </div>
-
-      {/* Map */}
-
-      <div className="flex-1">
-
-        <MapContainer
-          center={indiaCenter}
-          zoom={6}
-          style={{
-            height: "100%",
-            width: "100%",
-          }}
-        >
-
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution="&copy; OpenStreetMap contributors"
-          />
-
-          {/* User Location */}
-
-          {userLocation && (
-
-            <CircleMarker
-              center={userLocation}
-              radius={10}
-              pathOptions={{
-                color: "blue",
-              }}
-            >
-
-              <Popup>
-                📍 Your Location
-              </Popup>
-
-            </CircleMarker>
-
-          )}
-
-          {/* Incident Markers */}
-
-          {filteredIncidents.map(
-            (incident) => (
-
-              <Marker
-                key={incident.id}
-                position={[
-                  incident.latitude,
-                  incident.longitude,
-                ] as [
-                  number,
-                  number
-                ]}
+          {/* Filter Buttons */}
+          <div className="bg-[#0B1D33] p-4 flex gap-3 flex-wrap justify-center border-b border-slate-800">
+            {[
+              "All",
+              "Fire",
+              "Flood",
+              "Medical",
+              "Earthquake",
+            ].map((item) => (
+              <motion.button
+                key={item}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setFilter(item)}
+                className={`px-6 py-2 rounded-xl transition ${
+                  filter === item
+                    ? "bg-red-600 text-white"
+                    : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                }`}
               >
+                {item}
+              </motion.button>
+            ))}
+          </div>
 
-                <Popup>
+          {/* Map */}
+          <div className="flex-1">
+            <MapContainer as="div" {...({
+              center: indiaCenter,
+              zoom: 6,
+              style: { height: "100%", width: "100%" }
+            } as any)}>
+              <TileLayer as="div" {...({
+                url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                attribution: "&copy; OpenStreetMap contributors"
+              } as any)} />
 
-                  <div className="min-w-[220px]">
-
-                    <h3 className="font-bold text-lg">
-
-                      {getDisasterIcon(
-                        incident.incident_type
-                      )}{" "}
-
-                      {incident.incident_type
-                        .charAt(0)
-                        .toUpperCase() +
-                        incident.incident_type.slice(
-                          1
-                        )}
-
-                    </h3>
-
-                    <div className="mt-2">
-
-                      <span
-                        className={`px-2 py-1 rounded text-sm ${
-                          incident.severity ===
-                          "High"
-                            ? "bg-red-100 text-red-700"
-                            : incident.severity ===
-                              "Medium"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-green-100 text-green-700"
-                        }`}
-                      >
-
-                        {
-                          incident.severity
-                        }
-
-                      </span>
-
+              {/* User Location */}
+              {userLocation && (
+                <CircleMarker as="div" {...({
+                  center: userLocation,
+                  radius: 10,
+                  pathOptions: {
+                    color: "#0ea5e9",
+                    fillColor: "#0ea5e9",
+                    fillOpacity: 0.5,
+                  }
+                } as any)}>
+                  <Popup>
+                    <div className="text-slate-900">
+                      📍 Your Location
                     </div>
+                  </Popup>
+                </CircleMarker>
+              )}
 
-                    <p className="mt-3">
-
-                      {
-                        incident.description
-                      }
-
-                    </p>
-
-                  </div>
-
-                </Popup>
-
-              </Marker>
-
-            )
-          )}
-
-        </MapContainer>
-
+              {/* Incident Markers */}
+              {filteredIncidents.map(
+                (incident) => (
+                  <Marker
+                    key={incident.id}
+                    position={[
+                      incident.latitude,
+                      incident.longitude,
+                    ] as [
+                      number,
+                      number
+                    ]}
+                  >
+                    <Popup>
+                      <div className="min-w-[220px] text-slate-900">
+                        <h3 className="font-bold text-lg">
+                          {getDisasterIcon(
+                            incident.incident_type
+                          )}{" "}
+                          {incident.incident_type
+                            .charAt(0)
+                            .toUpperCase() +
+                            incident.incident_type.slice(
+                              1
+                            )}
+                        </h3>
+                        <div className="mt-2">
+                          <span
+                            className={`px-2 py-1 rounded text-sm ${
+                              incident.severity ===
+                              "High"
+                                ? "bg-red-100 text-red-700"
+                                : incident.severity ===
+                                  "Medium"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-green-100 text-green-700"
+                            }`}
+                          >
+                            {incident.severity}
+                          </span>
+                        </div>
+                        <p className="mt-3">
+                          {incident.description}
+                        </p>
+                      </div>
+                    </Popup>
+                  </Marker>
+                )
+              )}
+            </MapContainer>
+          </div>
+        </div>
       </div>
-
     </div>
   );
 }
