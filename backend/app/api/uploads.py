@@ -9,13 +9,16 @@ from fastapi import (
 )
 
 from sqlalchemy.orm import Session
+from app.models.incident import Incident
+from json_repair import repair_json
 
 from app.database.database import get_db
 
 from app.models.upload import UploadedFile
+from app.models.ai_analysis import AIAnalysis
 
-from app.services.cloudinary_service import (
-    upload_file
+from app.services.gemini_vision import (
+    analyze_disaster_image
 )
 
 router = APIRouter(
@@ -45,28 +48,158 @@ async def upload_document(
 
         temp_path = temp_file.name
 
-    cloudinary_url = upload_file(
-        temp_path
-    )
+    try:
 
-    uploaded_file = UploadedFile(
-        user_id=1,
-        file_name=file.filename,
-        file_url=cloudinary_url,
-        file_type=file.content_type
-    )
+        UPLOAD_DIR = "uploads"
 
-    db.add(uploaded_file)
+        os.makedirs(
+            UPLOAD_DIR,
+            exist_ok=True
+        )
 
-    db.commit()
+        file_path = os.path.join(
+            UPLOAD_DIR,
+            file.filename
+        )
 
-    db.refresh(uploaded_file)
+        with open(
+            file_path,
+            "wb"
+        ) as buffer:
 
-    os.remove(temp_path)
+            buffer.write(
+                content
+            )
 
-    return {
-        "message":
-        "File uploaded successfully",
-        "url":
-        cloudinary_url
-    }
+        analysis = analyze_disaster_image(
+            file_path
+        )
+
+        analysis_json = repair_json(
+            analysis,
+            return_objects=True
+        )
+
+        uploaded_file = UploadedFile(
+            user_id=1,
+            file_name=file.filename,
+            file_url=file_path,
+            file_type=file.content_type
+        )
+
+        db.add(uploaded_file)
+        db.commit()
+        db.refresh(uploaded_file)
+
+        ai_analysis = AIAnalysis(
+
+            incident_type=
+                analysis_json.get(
+                    "incident_type",
+                    "Unknown"
+                ),
+
+            severity=
+                analysis_json.get(
+                    "severity",
+                    "Medium"
+                ),
+
+            summary=
+                analysis_json.get(
+                    "summary",
+                    ""
+                ),
+
+            recommendation=
+                analysis_json.get(
+                    "recommendation",
+                    ""
+                ),
+
+            image_url=
+                file_path
+
+        )
+
+        db.add(ai_analysis)
+        db.commit()
+        incident = Incident(
+
+            incident_type=
+                analysis_json.get(
+                    "incident_type",
+                    "Unknown"
+                ),
+
+            severity=
+                "High"
+                if analysis_json.get(
+                    "severity"
+                ) == "Catastrophic"
+                else "Medium",
+
+            latitude=
+                30.7333,
+
+            longitude=
+                76.7794,
+
+            description=
+                analysis_json.get(
+                    "summary",
+                    ""
+                )
+
+        )
+
+        db.add(
+            incident
+        )
+
+        db.commit()
+
+        db.refresh(
+            incident
+        )
+
+        return {
+
+            "message":
+                "Analysis Complete",
+
+            "incident_id":
+                incident.id,
+
+            "url":
+                file_path,
+
+            "incident_type":
+                analysis_json.get(
+                    "incident_type"
+                ),
+
+            "severity":
+                analysis_json.get(
+                    "severity"
+                ),
+
+            "summary":
+                analysis_json.get(
+                    "summary"
+                ),
+
+            "recommendation":
+                analysis_json.get(
+                    "recommendation"
+                )
+
+        }
+    finally:
+
+        if os.path.exists(
+            temp_path
+        ):
+            os.remove(
+                temp_path
+            )

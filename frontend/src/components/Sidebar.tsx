@@ -14,11 +14,15 @@ export default function Sidebar() {
       <div className="p-6">
 
         <h1 className="text-2xl font-bold text-red-500">
+
           Sentinel AI
+
         </h1>
 
         <p className="text-slate-400 text-sm">
+
           Emergency Intelligence
+
         </p>
 
       </div>
@@ -26,34 +30,73 @@ export default function Sidebar() {
       <nav className="mt-8">
 
         <button
+
           onClick={() =>
+
             navigate("/dashboard")
+
           }
+
           className="w-full text-left px-6 py-3 hover:bg-slate-800"
+
         >
-          Dashboard
+
+          📊 Dashboard
+
         </button>
 
         <button
+
           onClick={() =>
+
             navigate("/report")
+
           }
+
           className="w-full text-left px-6 py-3 hover:bg-slate-800"
+
         >
-          Report Incident
+
+          🚨 Report Incident
+
         </button>
 
         <button
+
           onClick={() =>
+
             navigate("/map")
+
           }
+
           className="w-full text-left px-6 py-3 hover:bg-slate-800"
+
         >
-          Disaster Map
+
+          🗺️ Disaster Map
+
+        </button>
+
+        <button
+
+          onClick={() =>
+
+            navigate("/assistant")
+
+          }
+
+          className="w-full text-left px-6 py-3 hover:bg-slate-800"
+
+        >
+
+          🤖 Emergency Assistant
+
         </button>
 
       </nav>
 
     </aside>
+
   );
+
 }

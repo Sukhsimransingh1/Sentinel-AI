@@ -1,33 +1,24 @@
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import ForeignKey
-from sqlalchemy import DateTime
-
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, Text, DateTime
 from sqlalchemy.sql import func
 
 from app.database.database import Base
+
 
 class Chat(Base):
 
     __tablename__ = "chats"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
 
-    user_id = Column(
-        Integer,
-        ForeignKey("users.id")
-    )
+    user_id = Column(Integer)
 
-    title = Column(String)
+    question = Column(Text)
+
+    answer = Column(Text)
+
+    image_path = Column(Text, nullable=True)
 
     created_at = Column(
-        DateTime(timezone=True),
+        DateTime,
         server_default=func.now()
-    )
-
-    user = relationship(
-        "User",
-        backref="chats"
     )

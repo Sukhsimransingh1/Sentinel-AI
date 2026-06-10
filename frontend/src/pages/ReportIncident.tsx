@@ -25,6 +25,16 @@ export default function ReportIncident() {
   ] = useState("");
 
   const [
+    image,
+    setImage
+  ] = useState<File | null>(null);
+
+  const [
+    analyzing,
+    setAnalyzing
+  ] = useState(false);
+
+  const [
     latitude,
     setLatitude
   ] = useState<number | null>(null);
@@ -68,6 +78,101 @@ export default function ReportIncident() {
     );
 
   }, []);
+
+  const handleAnalyze =
+    async () => {
+
+      if (!image) {
+
+        alert(
+          "Please select an image first"
+        );
+
+        return;
+      }
+
+      try {
+
+        setAnalyzing(true);
+
+        const formData =
+          new FormData();
+
+        formData.append(
+          "file",
+          image
+        );
+
+        const response =
+          await fetch(
+            "http://127.0.0.1:8000/uploads/",
+            {
+              method: "POST",
+              body: formData
+            }
+          );
+
+        const data =
+          await response.json();
+
+        console.log(data);
+
+        setIncidentType(
+          data.incident_type || ""
+        );
+
+        if (
+          data.severity ===
+          "Catastrophic"
+        ) {
+
+          setSeverity(
+            "High"
+          );
+
+        } else if (
+          data.severity ===
+          "Moderate"
+        ) {
+
+          setSeverity(
+            "Medium"
+          );
+
+        } else {
+
+          setSeverity(
+            "Low"
+          );
+        }
+
+        setDescription(
+          data.summary || ""
+        );
+
+        alert(
+          "AI Analysis Complete"
+        );
+
+      } catch (
+        error
+      ) {
+
+        console.error(
+          error
+        );
+
+        alert(
+          "Analysis Failed"
+        );
+
+      } finally {
+
+        setAnalyzing(
+          false
+        );
+      }
+    };
 
   const handleSubmit =
     async (
@@ -116,10 +221,12 @@ export default function ReportIncident() {
         );
 
       } catch(error: any) {
+
         console.error(error);
+
         alert(
-            error?.response?.data?.detail ||
-            "Failed To Report Incident"
+          error?.response?.data?.detail ||
+          "Failed To Report Incident"
         );
 
       } finally {
@@ -129,6 +236,7 @@ export default function ReportIncident() {
     };
 
   return (
+
     <div className="min-h-screen bg-slate-950 text-white">
 
       <div className="max-w-3xl mx-auto p-8">
@@ -143,6 +251,49 @@ export default function ReportIncident() {
             onSubmit={handleSubmit}
             className="space-y-5"
           >
+
+            <div>
+
+              <label className="block mb-2 text-slate-300">
+                Upload Disaster Image
+              </label>
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+
+                  if (
+                    e.target.files?.[0]
+                  ) {
+
+                    setImage(
+                      e.target.files[0]
+                    );
+                  }
+
+                }}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3"
+              />
+
+            </div>
+
+            <button
+              type="button"
+              onClick={handleAnalyze}
+              disabled={
+                analyzing
+              }
+              className="w-full bg-blue-600 hover:bg-blue-700 rounded-lg py-3 font-semibold"
+            >
+
+              {
+                analyzing
+                  ? "Analyzing..."
+                  : "Analyze Image with AI"
+              }
+
+            </button>
 
             <div>
 
@@ -226,15 +377,11 @@ export default function ReportIncident() {
             <div className="bg-slate-800 rounded-lg p-4 text-sm">
 
               <p>
-                Latitude:
-                {" "}
-                {latitude ?? "Loading..."}
+                Latitude: {latitude ?? "Loading..."}
               </p>
 
               <p>
-                Longitude:
-                {" "}
-                {longitude ?? "Loading..."}
+                Longitude: {longitude ?? "Loading..."}
               </p>
 
             </div>
@@ -244,11 +391,13 @@ export default function ReportIncident() {
               disabled={loading}
               className="w-full bg-red-600 hover:bg-red-700 rounded-lg py-3 font-semibold"
             >
+
               {
                 loading
                   ? "Submitting..."
                   : "Report Incident"
               }
+
             </button>
 
           </form>
@@ -258,6 +407,6 @@ export default function ReportIncident() {
       </div>
 
     </div>
+
   );
 }
-

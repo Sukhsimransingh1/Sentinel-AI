@@ -1,11 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from app.api.analytics import router as analytics_router
 from app.api.auth import router as auth_router
 from app.api.users import router as users_router
 from app.api.incidents import router as incidents_router
 from app.api.uploads import (
     router as upload_router
+)
+from app.api.assistant import (
+    router as assistant_router
 )
 app = FastAPI(
     title="Sentinel AI API"
@@ -27,7 +30,12 @@ app.include_router(incidents_router)
 app.include_router(
     upload_router
 )
-
+app.include_router(
+    analytics_router
+)
+app.include_router(
+    assistant_router
+)
 @app.get("/")
 def root():
     return {

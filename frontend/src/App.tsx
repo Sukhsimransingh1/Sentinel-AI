@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import ReportIncident from "./pages/ReportIncident";
 import MapPage from "./pages/MapPage";
+import EmergencyAssistant from "./pages/EmergencyAssistant";
 function App() {
 
   return (
@@ -32,6 +33,12 @@ function App() {
         <Route
           path="/map"
           element={<MapPage />}
+        />
+        <Route
+          path="/assistant"
+          element={
+            <EmergencyAssistant />
+          }
         />
       </Routes>
 

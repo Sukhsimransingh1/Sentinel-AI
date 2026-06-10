@@ -1,16 +1,46 @@
-backend/venv/
-
-frontend/node_modules/
-frontend/dist/
-
-backend/uploads/
-uploads/
+venv/
 
 __pycache__/
+
 *.pyc
+
+*.pyo
+
+*.pyd
 
 .env
 
+.env.*
+
+node_modules/
+
+dist/
+
+build/
+
+coverage/
+
+.pytest_cache/
+
+.mypy_cache/
+
 .vscode/
 
+.idea/
+
+.DS_Store
+
+Thumbs.db
+
 *.log
+
+*.sqlite3
+
+*.db
+
+
+uploads/
+
+*.tmp
+
+*.bak

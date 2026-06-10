@@ -46,3 +46,4 @@ class Incident(Base):
         "User",
         backref="incidents"
     )
+    
